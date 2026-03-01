@@ -66,8 +66,8 @@ public class DefaultComponentFactory {
                 .advertise(true)
                 ,
                 new Activation()
-                .neutralDescription("ProtocolLib 4.8.0 or later for Minecraft 1.18.x")
-                .pluginVersionGT("ProtocolLib", "4.8.0", true)
+                .neutralDescription("ProtocolLib 4.9.0 or later for Minecraft 1.18.x")
+                .pluginVersionGT("ProtocolLib", "4.9.0", true)
                 .minecraftVersionBetween("1.18", true, "1.19", false)
                 .advertise(true)
                 ,
