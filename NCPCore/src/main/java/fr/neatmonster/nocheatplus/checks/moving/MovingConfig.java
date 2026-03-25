@@ -129,6 +129,10 @@ public class MovingConfig extends ACheckConfig {
     public final boolean    survivalFlyAccountingV;
     public final boolean    survivalFlyAccountingStep;
     public final boolean    survivalFlyResetItem;
+
+    // Wind Burst & Wind Charge Support
+    public final boolean    survivalFlyWindBurst;
+    public final boolean    survivalFlyWindCharge;
     // Leniency settings.
     /** Horizontal buffer (rather sf), after failure leniency. */
     public final double     hBufMax;
@@ -270,6 +274,10 @@ public class MovingConfig extends ACheckConfig {
         survivalFlyAccountingV = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_VACC);
         survivalFlyAccountingStep = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_STEP);
         survivalFlyResetItem = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_RESETITEM);
+
+        // Load Wind Burst & Wind Charge Config (defaults to true)
+        survivalFlyWindBurst = config.getBoolean("checks.moving.survivalfly.extended.windburst", true);
+        survivalFlyWindCharge = config.getBoolean("checks.moving.survivalfly.extended.windcharge", true);
         sfSetBackPolicyFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE);
         sfSetBackPolicyVoid = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID);
 

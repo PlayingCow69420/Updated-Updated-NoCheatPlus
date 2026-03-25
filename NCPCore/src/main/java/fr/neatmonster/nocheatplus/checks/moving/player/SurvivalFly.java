@@ -439,7 +439,57 @@ public class SurvivalFly extends Check {
             }
         }
 
+/////////////////////////////////////////
+        // Wind Burst & Wind Charge Workaround //
+        /////////////////////////////////////////
+        if (hDistanceAboveLimit > 0.0 || vDistanceAboveLimit > 0.0) {
+            boolean exemptWind = false;
 
+            // 1. Configurable Mace with Wind Burst Support
+            // Note: Requires 'survivalFlyWindBurst' boolean in MovingConfig.java
+            if (cc.survivalFlyWindBurst) {
+                ItemStack mainHand = Bridge1_9.getItemInMainHand(player);
+                if (mainHand != null && mainHand.getType().name().equals("MACE")) {
+                    for (org.bukkit.enchantments.Enchantment ench : mainHand.getEnchantments().keySet()) {
+                        if (ench.getName().toUpperCase().contains("WIND_BURST")) {
+                            // Wind burst signature: the player was falling, followed by a sudden upward burst
+                            if (yDistance > 0.0 && lastMove.yDistance < 0.0) {
+                                exemptWind = true;
+                                tags.add("mace_windburst");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 2. Configurable Wind Charge Support
+            // Note: Requires 'survivalFlyWindCharge' boolean in MovingConfig.java
+            if (!exemptWind && cc.survivalFlyWindCharge) {
+                // Search for nearby wind charge entities upon unexpected movement burst
+                // (Only triggers on a failed check, keeping performance impact minimal)
+                for (org.bukkit.entity.Entity entity : player.getNearbyEntities(4.0, 4.0, 4.0)) {
+                    String eType = entity.getType().name();
+                    if (eType.equals("WIND_CHARGE") || eType.equals("BREEZE_WIND_CHARGE")) {
+                        exemptWind = true;
+                        tags.add("wind_charge");
+                        break;
+                    }
+                }
+            }
+
+            // 3. Apply the exemptions
+            if (exemptWind) {
+                hDistanceAboveLimit = 0.0;
+                vDistanceAboveLimit = 0.0;
+                data.momentumTick = 20;  // Retain horizontal freedom for the burst
+                data.sfNoLowJump = true; // Prevent low-jump flagging on descend
+                data.clearHAccounting(); // Clear the horizontal accumulator
+                if (cc.survivalFlyAccountingV) {
+                    data.vDistAcc.clear(); // Clear the vertical accumulator
+                }
+            }
+        }
 
 
         ////////////////////////////
