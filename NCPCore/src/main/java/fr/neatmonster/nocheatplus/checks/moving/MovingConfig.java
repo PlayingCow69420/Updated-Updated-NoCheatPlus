@@ -133,6 +133,14 @@ public class MovingConfig extends ACheckConfig {
     // Wind Burst & Wind Charge Support
     public final boolean    survivalFlyWindBurst;
     public final boolean    survivalFlyWindCharge;
+
+    // Leniency for Mace usage
+    public final double     maceLeniency;
+    public final int        maceLeniencyTicks;
+
+    // Leniency for Wind Charge usage
+    public final double     windChargeLeniency;
+    public final int        windChargeLeniencyTicks;
     // Leniency settings.
     /** Horizontal buffer (rather sf), after failure leniency. */
     public final double     hBufMax;
@@ -278,6 +286,14 @@ public class MovingConfig extends ACheckConfig {
         // Load Wind Burst & Wind Charge Config (defaults to true)
         survivalFlyWindBurst = config.getBoolean("checks.moving.survivalfly.extended.windburst", true);
         survivalFlyWindCharge = config.getBoolean("checks.moving.survivalfly.extended.windcharge", true);
+
+        // Load Mace and Wind Charge leniency configs
+        maceLeniency = config.getDouble("checks.moving.survivalfly.mace.leniency", 0.4);
+        maceLeniencyTicks = config.getInt("checks.moving.survivalfly.mace.ticks", 40);
+
+        windChargeLeniency = config.getDouble("checks.moving.survivalfly.windcharge.leniency", 0.6);
+        windChargeLeniencyTicks = config.getInt("checks.moving.survivalfly.windcharge.ticks", 60);
+
         sfSetBackPolicyFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE);
         sfSetBackPolicyVoid = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID);
 
