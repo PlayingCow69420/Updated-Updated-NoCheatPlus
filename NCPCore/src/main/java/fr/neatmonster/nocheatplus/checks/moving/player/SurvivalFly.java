@@ -24,6 +24,7 @@ import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.moving.magic.LostGround;
 import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
 import fr.neatmonster.nocheatplus.checks.moving.magic.MagicBunny;
+import fr.neatmonster.nocheatplus.checks.moving.magic.WindCharge;
 import fr.neatmonster.nocheatplus.checks.moving.magic.AirWorkarounds;
 import fr.neatmonster.nocheatplus.checks.moving.magic.LiquidWorkarounds;
 import fr.neatmonster.nocheatplus.checks.moving.model.LiftOffEnvelope;
@@ -406,13 +407,26 @@ public class SurvivalFly extends Check {
                 data.setFrictionJumpPhase();
             }
         }
-        // Fallback to in-air checks
         else {
             final double[] resultAir = vDistAir(now, player, from, fromOnGround, resetFrom,
                     to, toOnGround, resetTo, hDistanceAboveLimit, yDistance,
                     multiMoveCount, lastMove, data, cc, pData);
             vAllowedDistance = resultAir[0];
             vDistanceAboveLimit = resultAir[1];
+
+// Wind Charge, Mace, and Wind Burst Support
+            boolean isMaceFall = yDistance < 0.0 && isHoldingMace(player) && cc.maceEnabled;
+            boolean isWindBurstLaunch = yDistance > 0.0 && isHoldingMace(player) && cc.maceEnabled && hasWindBurst(player);
+
+            if (vDistanceAboveLimit > 0.0 && (isWindChargeActive(player) || isMaceFall || isWindBurstLaunch)) {
+                vAllowedDistance = yDistance;
+                vDistanceAboveLimit = 0.0;
+                tags.add(isWindChargeActive(player) ? "wind_charge" : (isWindBurstLaunch ? "wind_burst" : "mace_fall"));
+
+                if (cc.survivalFlyAccountingV) {
+                    data.vDistAcc.clear();
+                }
+            }
         }
 
         // Apply reverse step override to Air/Gravity checks
@@ -614,9 +628,24 @@ public class SurvivalFly extends Check {
             }
             // Lost ground or reset condition
             else data.sfNoLowJump = false;
-            // Reset data.
+// Reset data.
             data.setSetBack(to);
             data.sfJumpPhase = 0;
+
+            if ((isHoldingMace(player) && cc.maceEnabled) || isWindChargeActive(player)) {
+                data.sfNoLowJump = true;
+                data.clearAccounting();
+
+                if (isWindChargeActive(player)) {
+                    tags.add("wind_charge_land");
+                    // Removes the "protection" once they hit the ground
+                    player.removeMetadata("ncp_wind_charge", NCPAPIProvider.getNoCheatPlusAPI().getPlugin());
+                } else if (hasWindBurst(player)) {
+                    tags.add("wind_burst_land");
+                } else {
+                    tags.add("mace_land");
+                }
+            }
             data.clearAccounting();
             if (data.sfLowJump && resetFrom) {
                 // Prevent reset if coming from air (purpose of the flag).
@@ -1501,7 +1530,12 @@ public class SurvivalFly extends Check {
             hAllowedDistance *= cc.survivalFlySpeedingSpeed / 100D;
         }
 
-        // Base speed is set.
+// Base speed is set.
+        if (isWindChargeActive(player) || (cc.maceEnabled && isHoldingMace(player) && hasWindBurst(player) && (to.getY() - from.getY()) > 0.0)) {
+            hAllowedDistance = hDistance; // Allow horizontal movement while boosted by Wind Charge or upward Wind Burst
+        } else if (cc.maceEnabled && isHoldingMace(player) && (to.getY() - from.getY()) < -0.5) {
+            hAllowedDistance *= cc.maceHorizontalModifier;
+        }
         thisMove.hAllowedDistanceBase = hAllowedDistance;
 
 
@@ -2645,4 +2679,23 @@ public class SurvivalFly extends Check {
     private void logPostViolationTags(final Player player) {
         debug(player, "SurvivalFly Post violation handling tag update:\n" + StringUtil.join(tags, "+"));
     }
+    private boolean isHoldingMace(final Player player) {
+        final ItemStack stack = player.getInventory().getItemInMainHand();
+        if (stack == null) return false;
+        final Material mace = Material.matchMaterial("MACE");
+        return mace != null && stack.getType() == mace;
+    }
+
+    private boolean hasWindBurst(final Player player) {
+        final ItemStack stack = player.getInventory().getItemInMainHand();
+        if (stack == null || !isHoldingMace(player)) return false;
+        // Safely check for the Wind Burst enchantment across versions
+        for (org.bukkit.enchantments.Enchantment ench : stack.getEnchantments().keySet()) {
+            if (ench.getKey().getKey().equals("wind_burst")) {
+                return true;
+            }
+        }
+        return false;
+    }
+ }
 }

@@ -125,6 +125,8 @@ public class MovingConfig extends ACheckConfig {
     public final boolean    sfGroundHop;
     public final double     sfStepHeight;
     public final double     sfReverseStep; // Added for Reverse Step feature
+    public final boolean    maceEnabled;
+    public final double     maceHorizontalModifier;
     public final boolean    survivalFlyAccountingH;
     public final boolean    survivalFlyAccountingV;
     public final boolean    survivalFlyAccountingStep;
@@ -273,8 +275,12 @@ public class MovingConfig extends ACheckConfig {
         sfSetBackPolicyFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE);
         sfSetBackPolicyVoid = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID);
 
-        // Load Reverse Step config (defaults to 1.0 blocks)
+// Load Reverse Step config (defaults to 1.0 blocks)
         sfReverseStep = config.getDouble("checks.moving.survivalfly.reversestep", 1.0);
+
+        // Mace Configuration
+        maceEnabled = config.getBoolean("checks.moving.survivalfly.mace.enabled", true);
+        maceHorizontalModifier = config.getDouble("checks.moving.survivalfly.mace.hmodifier", 1.2);
 
         final double sfStepHeight = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_STEPHEIGHT, Double.MAX_VALUE);
         if (sfStepHeight == Double.MAX_VALUE) {
