@@ -77,7 +77,8 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public double vehicleMorePacketsVL = 0.0;
     public double vehicleEnvelopeVL = 0.0;
     public double passableVL = 0.0;
-
+    public int maceLeniencyRemaining = 0;
+    public int windChargeLeniencyRemaining = 0;
 
 
 

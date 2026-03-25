@@ -162,7 +162,15 @@ public class SurvivalFly extends Check {
         if (data.liftOffEnvelope == LiftOffEnvelope.UNKNOWN) {
             data.adjustMediumProperties(from);
         }
+// Tick leniency timers
+        if (data.maceLeniencyRemaining > 0) data.maceLeniencyRemaining--;
+        if (data.windChargeLeniencyRemaining > 0) data.windChargeLeniencyRemaining--;
 
+        // Trigger: Detect Mace usage (Hand raised while holding Mace)
+        ItemStack handItem = Bridge1_9.getItemInMainHand(player);
+        if (handItem != null && handItem.getType().name().equals("MACE") && player.isHandRaised()) {
+            data.maceLeniencyRemaining = cc.maceLeniencyTicks;
+        }
         // Determine if the player is actually sprinting.
         final boolean sprinting;
         if (data.lostSprintCount > 0) {
@@ -281,6 +289,20 @@ public class SurvivalFly extends Check {
             // Set the allowed distance and determine the distance above limit
             hAllowedDistance = setAllowedhDist(player, sprinting, thisMove, data, cc, pData, from, to, true);
             hDistanceAboveLimit = hDistance - hAllowedDistance;
+
+// Apply Mace/Wind leniency to horizontal movement
+            if (data.maceLeniencyRemaining > 0) {
+                hDistanceAboveLimit -= cc.maceLeniency;
+                tags.add("mace_lenient");
+            }
+            if (data.windChargeLeniencyRemaining > 0) {
+                hDistanceAboveLimit -= cc.windChargeLeniency;
+                tags.add("wind_lenient");
+            }
+            if (hDistanceAboveLimit < 0) hDistanceAboveLimit = 0;
+
+            // Ensure we don't have a negative violation
+            if (hDistanceAboveLimit < 0) hDistanceAboveLimit = 0;
             // The player went beyond the allowed limit, execute the after failure checks.
             if (hDistanceAboveLimit > 0.0) {
                 final double[] resultH = hDistAfterFailure(player, from, to, hAllowedDistance, hDistanceAboveLimit,
@@ -413,6 +435,10 @@ public class SurvivalFly extends Check {
                     multiMoveCount, lastMove, data, cc, pData);
             vAllowedDistance = resultAir[0];
             vDistanceAboveLimit = resultAir[1];
+            // Apply Mace/Wind leniency to vertical movement
+            if (data.maceLeniencyRemaining > 0) vDistanceAboveLimit -= cc.maceLeniency;
+            if (data.windChargeLeniencyRemaining > 0) vDistanceAboveLimit -= cc.windChargeLeniency;
+            if (vDistanceAboveLimit < 0) vDistanceAboveLimit = 0;
         }
 
         // Apply reverse step override to Air/Gravity checks
