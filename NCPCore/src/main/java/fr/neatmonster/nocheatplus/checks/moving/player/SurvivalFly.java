@@ -171,6 +171,12 @@ public class SurvivalFly extends Check {
         if (handItem != null && handItem.getType().name().equals("MACE") && player.isHandRaised()) {
             data.maceLeniencyRemaining = cc.maceLeniencyTicks;
         }
+
+// Tick down the memory
+        if (data.windChargeLeniencyRemaining > 0) {
+            data.windChargeLeniencyRemaining--;
+        }
+
         // Determine if the player is actually sprinting.
         final boolean sprinting;
         if (data.lostSprintCount > 0) {
@@ -435,7 +441,7 @@ public class SurvivalFly extends Check {
                     multiMoveCount, lastMove, data, cc, pData);
             vAllowedDistance = resultAir[0];
             vDistanceAboveLimit = resultAir[1];
-        }
+
 
         // Apply reverse step override to Air/Gravity checks
         if (yDistance < 0.0 && Math.abs(yDistance) <= cc.sfReverseStep && vDistanceAboveLimit > 0.0) {
@@ -485,17 +491,23 @@ public class SurvivalFly extends Check {
                 }
             }
 
-            // 2. Configurable Wind Charge Support
-            // Note: Requires 'survivalFlyWindCharge' boolean in MovingConfig.java
+// 2. Configurable Wind Charge Support
             if (!exemptWind && cc.survivalFlyWindCharge) {
-                // Search for nearby wind charge entities upon unexpected movement burst
-                // (Only triggers on a failed check, keeping performance impact minimal)
-                for (org.bukkit.entity.Entity entity : player.getNearbyEntities(4.0, 4.0, 4.0)) {
-                    String eType = entity.getType().name();
-                    if (eType.equals("WIND_CHARGE") || eType.equals("BREEZE_WIND_CHARGE")) {
-                        exemptWind = true;
-                        tags.add("wind_charge");
-                        break;
+                // Check the "Memory" first. If the timer is > 0, they are exempt.
+                if (data.windChargeLeniencyRemaining > 0) {
+                    exemptWind = true;
+                    tags.add("wind_charge_memory");
+                } else {
+                    // If no memory, check near the player for a physical entity
+                    for (org.bukkit.entity.Entity entity : player.getNearbyEntities(4.0, 4.0, 4.0)) {
+                        String eType = entity.getType().name();
+                        if (eType.equals("WIND_CHARGE") || eType.equals("BREEZE_WIND_CHARGE")) {
+                            exemptWind = true;
+                            tags.add("wind_charge_entity");
+                            // TRIGGER THE MEMORY: Set the timer to 10 ticks
+                            data.windChargeLeniencyRemaining = 10;
+                            break;
+                        }
                     }
                 }
             }
