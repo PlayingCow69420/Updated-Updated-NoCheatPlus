@@ -162,32 +162,15 @@ public class SurvivalFly extends Check {
         if (data.liftOffEnvelope == LiftOffEnvelope.UNKNOWN) {
             data.adjustMediumProperties(from);
         }
-        // Trigger: Detect Mace usage (Hand raised while holding Mace with Wind Burst)
+// Tick leniency timers
+        if (data.maceLeniencyRemaining > 0) data.maceLeniencyRemaining--;
+        if (data.windChargeLeniencyRemaining > 0) data.windChargeLeniencyRemaining--;
+
+        // Trigger: Detect Mace usage (Hand raised while holding Mace)
         ItemStack handItem = Bridge1_9.getItemInMainHand(player);
         if (handItem != null && handItem.getType().name().equals("MACE") && player.isHandRaised()) {
-            boolean hasWindBurst = false;
-            for (org.bukkit.enchantments.Enchantment ench : handItem.getEnchantments().keySet()) {
-                if (ench.getName().toUpperCase().contains("WIND_BURST")) {
-                    hasWindBurst = true;
-                    break;
-                }
-            }
-            if (hasWindBurst) {
-                data.maceLeniencyUntil = now + (long)(cc.maceLeniencySeconds * 1000L);
-            }
+            data.maceLeniencyRemaining = cc.maceLeniencyTicks;
         }
-
-        // Early Bypass for Mace / Wind Charge Leniency
-        if (now < data.maceLeniencyUntil || now < data.windChargeLeniencyUntil) {
-            // Keep the setback location updated to prevent snapping back once leniency expires
-            data.setSetBack(to);
-            data.sfJumpPhase = 0;
-            data.clearAccounting();
-            data.clearHAccounting();
-            if (cc.survivalFlyAccountingV) data.vDistAcc.clear();
-            return null; // Ignore SurvivalFly entirely for this move
-        }
-
         // Determine if the player is actually sprinting.
         final boolean sprinting;
         if (data.lostSprintCount > 0) {
@@ -307,7 +290,27 @@ public class SurvivalFly extends Check {
             hAllowedDistance = setAllowedhDist(player, sprinting, thisMove, data, cc, pData, from, to, true);
             hDistanceAboveLimit = hDistance - hAllowedDistance;
 
-// 
+// Apply Mace/Wind leniency to horizontal movement
+            if (data.maceLeniencyRemaining > 0) {
+                hDistanceAboveLimit -= cc.maceLeniency;
+                tags.add("mace_lenient");
+            }
+            if (data.windChargeLeniencyRemaining > 0) {
+                hDistanceAboveLimit -= cc.windChargeLeniency;
+                tags.add("wind_lenient");
+            }
+            if (hDistanceAboveLimit < 0) hDistanceAboveLimit = 0;
+
+            // Ensure we don't have a negative violation
+            if (hDistanceAboveLimit < 0) hDistanceAboveLimit = 0;
+            // The player went beyond the allowed limit, execute the after failure checks.
+            if (hDistanceAboveLimit > 0.0) {
+                final double[] resultH = hDistAfterFailure(player, from, to, hAllowedDistance, hDistanceAboveLimit,
+                        sprinting, thisMove, lastMove, data, cc, pData, false);
+                hAllowedDistance = resultH[0];
+                hDistanceAboveLimit = resultH[1];
+                hFreedom = resultH[2];
+            }
             // Clear active velocity if the distance is within limit (clearly not needed. :))2
             else {
                 data.clearActiveHorVel();
@@ -432,7 +435,11 @@ public class SurvivalFly extends Check {
                     multiMoveCount, lastMove, data, cc, pData);
             vAllowedDistance = resultAir[0];
             vDistanceAboveLimit = resultAir[1];
-            
+            // Apply Mace/Wind leniency to vertical movement
+            if (data.maceLeniencyRemaining > 0) vDistanceAboveLimit -= cc.maceLeniency;
+            if (data.windChargeLeniencyRemaining > 0) vDistanceAboveLimit -= cc.windChargeLeniency;
+            if (vDistanceAboveLimit < 0) vDistanceAboveLimit = 0;
+        }
 
         // Apply reverse step override to Air/Gravity checks
         if (yDistance < 0.0 && Math.abs(yDistance) <= cc.sfReverseStep && vDistanceAboveLimit > 0.0) {
@@ -492,13 +499,10 @@ public class SurvivalFly extends Check {
                     if (eType.equals("WIND_CHARGE") || eType.equals("BREEZE_WIND_CHARGE")) {
                         exemptWind = true;
                         tags.add("wind_charge");
-                        // Activate wind charge leniency for subsequent moves
-                        data.windChargeLeniencyUntil = now + (long)(cc.windChargeLeniencySeconds * 1000L);
                         break;
                     }
                 }
             }
-
 
             // 3. Apply the exemptions
             if (exemptWind) {
