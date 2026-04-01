@@ -168,14 +168,25 @@ public class SurvivalFly extends Check {
         if (data.longJumpCooldownRemaining > 0) data.longJumpCooldownRemaining--;
 
         // Trigger: Detect Step for LongJump Leniency
-        // Only apply leniency when a legitimate ground-to-ground step is detected.
-        // This prevents the multiplier from being active during normal long jumps / bunny hops.
-        // IMPROVEMENT: Added 'fromOnGround' to strictly ensure this was a valid ground-to-ground step
+        // Grant leniency only on a real ground-to-ground step
         if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround
                 && data.longJumpCooldownRemaining <= 0) {
 
             data.longJumpLeniencyRemaining = cc.longJumpLeniencyTicks;
             data.longJumpCooldownRemaining = cc.longJumpCooldownTicks;
+            tags.add("longjump_step_granted");
+        }
+
+        // Detect takeoff (jump off ground) after a step → start one full longjump
+        if (fromOnGround && !toOnGround && data.longJumpLeniencyRemaining > 0) {
+            data.longJumpLeniencyRemaining = 40;   // enough for any normal jump
+            tags.add("longjump_takeoff");
+        }
+
+        // Detect landing → consume leniency (one longjump completed)
+        if (!fromOnGround && toOnGround && data.longJumpLeniencyRemaining > 0) {
+            data.longJumpLeniencyRemaining = 0;
+            tags.add("longjump_landed_consumed");
         }
         // Determine if the player is actually sprinting.
         final boolean sprinting;
@@ -292,16 +303,19 @@ public class SurvivalFly extends Check {
         // Run through all hDistance checks if the player has actually some horizontal distance
         if (HasHorizontalDistance) {
             final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-            // Set the allowed distance and determine the distance above limit
+
+            // Set the allowed distance normally first
             hAllowedDistance = setAllowedhDist(player, sprinting, thisMove, data, cc, pData, from, to, true);
-// Apply LongJump Leniency to relax horizontal movement checks
+
+            // Apply LongJump Leniency for ONE full jump (takeoff → landing)
             if (data.longJumpLeniencyRemaining > 0 && cc.longJumpLeniencyMultiplier > 1.0) {
                 hAllowedDistance *= cc.longJumpLeniencyMultiplier;
                 thisMove.hAllowedDistance *= cc.longJumpLeniencyMultiplier;
                 thisMove.hAllowedDistanceBase *= cc.longJumpLeniencyMultiplier;
-                // IMPROVEMENT: Added the remaining ticks to the tag for easier debugging
                 tags.add("longjump_lenient(" + data.longJumpLeniencyRemaining + ")");
+                // Do NOT consume here — consumption happens automatically on landing
             }
+
             hDistanceAboveLimit = hDistance - hAllowedDistance;
 
 // Apply Mace/Wind leniency to horizontal movement
