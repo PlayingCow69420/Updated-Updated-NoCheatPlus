@@ -58,7 +58,7 @@ public class MovingConfig extends ACheckConfig {
     /** * Ticks to relax horizontal checks after a step.
      * Default: 10 (0.5 seconds).
      */
-    public int longJumpLeniencyTicks = 10;
+    public int longJumpLeniencyTicks = 40;
     public double longJumpLeniencyMultiplier = 2.0;
     public int longJumpCooldownTicks = 40;
     public int maceCooldownTicks = 40;
@@ -303,8 +303,8 @@ public class MovingConfig extends ACheckConfig {
         windChargeLeniency = config.getDouble("checks.moving.survivalfly.windcharge.leniency", 0.6);
         windChargeLeniencyTicks = config.getInt("checks.moving.survivalfly.windcharge.ticks", 60);
         // Load LongJump leniency configs
-        longJumpLeniencyMultiplier = config.getDouble("checks.moving.survivalfly.longjump.multiplier", 2.0);
-        longJumpLeniencyTicks = config.getInt("checks.moving.survivalfly.longjump.ticks", 10);
+        longJumpLeniencyMultiplier = config.getDouble("checks.moving.survivalfly.longjump.multiplier", 5.0);
+        longJumpLeniencyTicks = config.getInt("checks.moving.survivalfly.longjump.ticks", 40);
         longJumpCooldownTicks = config.getInt("checks.moving.survivalfly.longjump.cooldown", 40);
 
         sfSetBackPolicyFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE);
