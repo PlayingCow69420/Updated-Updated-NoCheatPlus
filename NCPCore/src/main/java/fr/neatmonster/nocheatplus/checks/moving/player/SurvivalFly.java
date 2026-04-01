@@ -165,11 +165,17 @@ public class SurvivalFly extends Check {
 // Tick leniency timers
         if (data.maceLeniencyRemaining > 0) data.maceLeniencyRemaining--;
         if (data.windChargeLeniencyRemaining > 0) data.windChargeLeniencyRemaining--;
+        if (data.longJumpLeniencyRemaining > 0) data.longJumpLeniencyRemaining--;
 
-        // Trigger: Detect Mace usage (Hand raised while holding Mace)
-        ItemStack handItem = Bridge1_9.getItemInMainHand(player);
-        if (handItem != null && handItem.getType().name().equals("MACE") && player.isHandRaised()) {
-            data.maceLeniencyRemaining = cc.maceLeniencyTicks;
+// Trigger: Detect Step for LongJump Leniency
+        // IMPROVEMENT: Added 'fromOnGround' to strictly ensure this was a valid ground-to-ground step
+        if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround) {
+            data.longJumpLeniencyRemaining = cc.longJumpLeniencyTicks;
+        }
+        // Trigger: Detect Step for LongJump Leniency
+        // Checks if the player moved upwards within the allowed step height and landed on the ground
+        if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && toOnGround) {
+            data.longJumpLeniencyRemaining = cc.longJumpLeniencyTicks;
         }
         // Determine if the player is actually sprinting.
         final boolean sprinting;
@@ -288,6 +294,14 @@ public class SurvivalFly extends Check {
             final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
             // Set the allowed distance and determine the distance above limit
             hAllowedDistance = setAllowedhDist(player, sprinting, thisMove, data, cc, pData, from, to, true);
+// Apply LongJump Leniency to relax horizontal movement checks
+            if (data.longJumpLeniencyRemaining > 0 && cc.longJumpLeniencyMultiplier > 1.0) {
+                hAllowedDistance *= cc.longJumpLeniencyMultiplier;
+                thisMove.hAllowedDistance *= cc.longJumpLeniencyMultiplier;
+                thisMove.hAllowedDistanceBase *= cc.longJumpLeniencyMultiplier;
+                // IMPROVEMENT: Added the remaining ticks to the tag for easier debugging
+                tags.add("longjump_lenient(" + data.longJumpLeniencyRemaining + ")");
+            }
             hDistanceAboveLimit = hDistance - hAllowedDistance;
 
 // Apply Mace/Wind leniency to horizontal movement

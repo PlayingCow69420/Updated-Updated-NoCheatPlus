@@ -54,6 +54,17 @@ import fr.neatmonster.nocheatplus.worlds.IWorldData;
  */
 public class MovingConfig extends ACheckConfig {
 
+
+    /** * Ticks to relax horizontal checks after a step.
+     * Default: 10 (0.5 seconds).
+     */
+    public int longJumpLeniencyTicks = 10;
+
+    /** * Multiplier to adjust horizontal strictness during the leniency period.
+     * 2.0 = Double the allowed distance (twice as lenient).
+     * 1.0 = Normal strictness.
+     */
+    public double longJumpLeniencyMultiplier = 2.0;
     // Model flying ids.
     public static final String ID_JETPACK_ELYTRA = "jetpack.elytra";
     public static final String ID_POTION_LEVITATION = "potion.levitation";
