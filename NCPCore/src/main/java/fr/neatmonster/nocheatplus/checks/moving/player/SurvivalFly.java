@@ -319,8 +319,8 @@ public class SurvivalFly extends Check {
             // Set the allowed distance normally first
             hAllowedDistance = setAllowedhDist(player, sprinting, thisMove, data, cc, pData, from, to, true);
 
-            // Apply LongJump Leniency for ONE full jump (takeoff → landing)
-            if (data.longJumpLeniencyRemaining > 0 && cc.longJumpLeniencyMultiplier > 1.0) {
+// Apply LongJump Leniency only when in the air (takeoff → landing)
+            if (!toOnGround && data.longJumpLeniencyRemaining > 0 && cc.longJumpLeniencyMultiplier > 1.0) {
                 hAllowedDistance *= cc.longJumpLeniencyMultiplier;
                 thisMove.hAllowedDistance *= cc.longJumpLeniencyMultiplier;
                 thisMove.hAllowedDistanceBase *= cc.longJumpLeniencyMultiplier;
@@ -2111,8 +2111,8 @@ public class SurvivalFly extends Check {
             if (!data.isUsingItem) {
                 hAllowedDistance = setAllowedhDist(player, sprinting, thisMove, data, cc, pData, from, to, true);
 
-// Apply LongJump leniency BEFORE the horizontal check
-                if (data.longJumpLeniencyRemaining > 0 && cc.longJumpLeniencyMultiplier > 1.0) {
+// Apply LongJump leniency only when in the air
+                if (!thisMove.to.onGround && data.longJumpLeniencyRemaining > 0 && cc.longJumpLeniencyMultiplier > 1.0) {
                     hAllowedDistance *= cc.longJumpLeniencyMultiplier;
                     thisMove.hAllowedDistance *= cc.longJumpLeniencyMultiplier;
                     thisMove.hAllowedDistanceBase *= cc.longJumpLeniencyMultiplier;
