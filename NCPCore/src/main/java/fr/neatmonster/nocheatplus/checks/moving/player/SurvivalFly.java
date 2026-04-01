@@ -168,8 +168,8 @@ public class SurvivalFly extends Check {
         if (data.longJumpCooldownRemaining > 0) data.longJumpCooldownRemaining--;
         if (data.maceCooldownRemaining > 0) data.maceCooldownRemaining--;
 
-        // Trigger: Detect Step for LongJump Leniency
-        // Grant leniency only on a real ground-to-ground step
+// Trigger: Detect Step for LongJump Leniency
+// Grant leniency only on a real ground-to-ground step (minimum 16 ticks)
         if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround
                 && data.longJumpCooldownRemaining <= 0) {
 
