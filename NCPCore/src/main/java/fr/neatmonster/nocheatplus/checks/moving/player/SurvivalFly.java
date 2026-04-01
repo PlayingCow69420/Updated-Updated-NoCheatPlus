@@ -172,7 +172,7 @@ public class SurvivalFly extends Check {
         if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround
                 && data.longJumpCooldownRemaining <= 0) {
 
-            data.longJumpLeniencyRemaining = cc.longJumpLeniencyTicks;
+            data.longJumpLeniencyRemaining = Math.max(16, cc.longJumpLeniencyTicks);
             data.longJumpCooldownRemaining = cc.longJumpCooldownTicks;
             tags.add("longjump_step_granted");
         }
