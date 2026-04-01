@@ -192,13 +192,6 @@ public class SurvivalFly extends Check {
             }
         }
 
-// Detect takeoff (jump off ground) after a step → start one full longjump
-        if (fromOnGround && !toOnGround && data.longJumpLeniencyRemaining > 0) {
-            data.longJumpLeniencyRemaining = 40;
-            tags.add("longjump_takeoff");
-            System.out.println("[LongJump] Takeoff, leniency=" + data.longJumpLeniencyRemaining);
-        }
-
         // Detect landing → consume leniency (one longjump completed)
         if (!fromOnGround && toOnGround && data.longJumpLeniencyRemaining > 0) {
             data.longJumpLeniencyRemaining = 0;
