@@ -168,18 +168,17 @@ public class SurvivalFly extends Check {
         if (data.longJumpCooldownRemaining > 0) data.longJumpCooldownRemaining--;
         if (data.maceCooldownRemaining > 0) data.maceCooldownRemaining--;
 
-// Trigger: Detect Step for LongJump Leniency (more tolerant for client hacks)
-// Option A: Try the normal ground-to-ground step first
+// Trigger: Detect Step for LongJump Leniency (robust for client hacks)
         boolean stepDetected = false;
-        if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround
-                && data.longJumpCooldownRemaining <= 0) {
-            stepDetected = true;
-        }
-// Option B: If the client skipped the intermediate ground state, detect a jump from ground
-        else if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && !toOnGround
-                && data.longJumpCooldownRemaining <= 0 && lastMove.toIsValid && lastMove.to.onGround) {
-            // We were on ground last move, now in air with a small yDistance – treat as a step
-            stepDetected = true;
+        if (data.longJumpCooldownRemaining <= 0) {
+            // Check if we were on ground in the previous move and now moved upward within step height
+            if (lastMove.toIsValid && lastMove.to.onGround && yDistance > 0.0 && yDistance <= cc.sfStepHeight) {
+                stepDetected = true;
+            }
+            // Also keep the normal ground-to-ground step for legitimate players
+            else if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround) {
+                stepDetected = true;
+            }
         }
 
         if (stepDetected) {
