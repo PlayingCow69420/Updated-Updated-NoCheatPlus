@@ -570,6 +570,13 @@ public class SurvivalFly extends Check {
         // Handle violations               ///
         //////////////////////////////////////
         final boolean inAir = Magic.inAir(thisMove);
+        // If long jump leniency is active, ignore all violations
+        if (data.longJumpLeniencyRemaining > 0) {
+            hDistanceAboveLimit = 0;
+            vDistanceAboveLimit = 0;
+            tags.add("leniency_ignore_violations");
+        }
+
         final double result = (Math.max(hDistanceAboveLimit, 0D) + Math.max(vDistanceAboveLimit, 0D)) * 100D;
         if (result > 0D) {
 
@@ -584,19 +591,19 @@ public class SurvivalFly extends Check {
         }
         else {
             // Slowly reduce the level with each event, if violations have not recently happened.
-            if (data.getPlayerMoveCount() - data.sfVLMoveCount > cc.survivalFlyVLFreezeCount 
-                && (!cc.survivalFlyVLFreezeInAir || !inAir
+            if (data.getPlayerMoveCount() - data.sfVLMoveCount > cc.survivalFlyVLFreezeCount
+                    && (!cc.survivalFlyVLFreezeInAir || !inAir
                     // Favor bunny-hopping slightly: clean descend.
                     || !data.sfVLInAir
                     && data.liftOffEnvelope == LiftOffEnvelope.NORMAL
-                    && lastMove.toIsValid 
+                    && lastMove.toIsValid
                     && lastMove.yDistance < -Magic.GRAVITY_MIN
                     && thisMove.yDistance - lastMove.yDistance < -Magic.GRAVITY_MIN)) {
                 // Relax VL.
                 data.survivalFlyVL *= 0.95;
                 // Finally check horizontal buffer regain.
                 if (hDistanceAboveLimit < 0.0 && result <= 0.0 && !isSamePos && data.sfHorizontalBuffer < cc.hBufMax
-                    && !data.sfLowJump) {
+                        && !data.sfLowJump) {
                     // TODO: max min other conditions ?
                     hBufRegain(hDistance, Math.min(0.2, Math.abs(hDistanceAboveLimit)), data, cc);
                 }
