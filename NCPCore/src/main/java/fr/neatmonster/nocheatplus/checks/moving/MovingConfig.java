@@ -59,13 +59,13 @@ public class MovingConfig extends ACheckConfig {
      * Default: 10 (0.5 seconds).
      */
     public int longJumpLeniencyTicks = 10;
-
-    /** * Multiplier to adjust horizontal strictness during the leniency period.
-     * 2.0 = Double the allowed distance (twice as lenient).
-     * 1.0 = Normal strictness.
-     */
     public double longJumpLeniencyMultiplier = 2.0;
     public int longJumpCooldownTicks = 40;
+    public int maceCooldownTicks = 40;
+    public int maceCooldownTicks = 40;
+    public double longJumpLeniencyMultiplier = 2.0;
+    public int longJumpCooldownTicks = 40;
+    public int maceCooldownTicks = 40;
     // Model flying ids.
     public static final String ID_JETPACK_ELYTRA = "jetpack.elytra";
     public static final String ID_POTION_LEVITATION = "potion.levitation";
@@ -149,6 +149,7 @@ public class MovingConfig extends ACheckConfig {
     // Leniency for Mace usage
     public final double     maceLeniency;
     public final int        maceLeniencyTicks;
+    public final int maceCooldownTicks;
 
     // Leniency for Wind Charge usage
     public final double     windChargeLeniency;
@@ -302,6 +303,7 @@ public class MovingConfig extends ACheckConfig {
         // Load Mace and Wind Charge leniency configs
         maceLeniency = config.getDouble("checks.moving.survivalfly.mace.leniency", 0.4);
         maceLeniencyTicks = config.getInt("checks.moving.survivalfly.mace.ticks", 40);
+        maceCooldownTicks = config.getInt("checks.moving.survivalfly.mace.cooldown", 40);
 
         windChargeLeniency = config.getDouble("checks.moving.survivalfly.windcharge.leniency", 0.6);
         windChargeLeniencyTicks = config.getInt("checks.moving.survivalfly.windcharge.ticks", 60);

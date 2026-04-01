@@ -166,6 +166,7 @@ public class SurvivalFly extends Check {
         if (data.maceLeniencyRemaining > 0) data.maceLeniencyRemaining--;
         if (data.windChargeLeniencyRemaining > 0) data.windChargeLeniencyRemaining--;
         if (data.longJumpCooldownRemaining > 0) data.longJumpCooldownRemaining--;
+        if (data.maceCooldownRemaining > 0) data.maceCooldownRemaining--;
 
         // Trigger: Detect Step for LongJump Leniency
         // Grant leniency only on a real ground-to-ground step
@@ -175,6 +176,17 @@ public class SurvivalFly extends Check {
             data.longJumpLeniencyRemaining = Math.max(16, cc.longJumpLeniencyTicks);
             data.longJumpCooldownRemaining = cc.longJumpCooldownTicks;
             tags.add("longjump_step_granted");
+        }
+
+
+        // Trigger: Grant Mace Leniency when holding a mace and cooldown is done
+        if (data.maceCooldownRemaining <= 0) {
+            ItemStack mainHand = Bridge1_9.getItemInMainHand(player);
+            if (mainHand != null && mainHand.getType().name().equals("MACE")) {
+                data.maceLeniencyRemaining = cc.maceLeniencyTicks;
+                data.maceCooldownRemaining = cc.maceCooldownTicks;
+                tags.add("mace_granted");
+            }
         }
 
         // Detect takeoff (jump off ground) after a step → start one full longjump
@@ -318,16 +330,6 @@ public class SurvivalFly extends Check {
 
             hDistanceAboveLimit = hDistance - hAllowedDistance;
 
-// Apply Mace/Wind leniency to horizontal movement
-            if (data.maceLeniencyRemaining > 0) {
-                hDistanceAboveLimit -= cc.maceLeniency;
-                tags.add("mace_lenient");
-            }
-            if (data.windChargeLeniencyRemaining > 0) {
-                hDistanceAboveLimit -= cc.windChargeLeniency;
-                tags.add("wind_lenient");
-            }
-            if (hDistanceAboveLimit < 0) hDistanceAboveLimit = 0;
 
             // Ensure we don't have a negative violation
             if (hDistanceAboveLimit < 0) hDistanceAboveLimit = 0;
@@ -464,9 +466,6 @@ public class SurvivalFly extends Check {
             vAllowedDistance = resultAir[0];
             vDistanceAboveLimit = resultAir[1];
             // Apply Mace/Wind leniency to vertical movement
-            if (data.maceLeniencyRemaining > 0) vDistanceAboveLimit -= cc.maceLeniency;
-            if (data.windChargeLeniencyRemaining > 0) vDistanceAboveLimit -= cc.windChargeLeniency;
-            if (vDistanceAboveLimit < 0) vDistanceAboveLimit = 0;
         }
 
         // Apply reverse step override to Air/Gravity checks
