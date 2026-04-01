@@ -62,10 +62,6 @@ public class MovingConfig extends ACheckConfig {
     public double longJumpLeniencyMultiplier = 2.0;
     public int longJumpCooldownTicks = 40;
     public int maceCooldownTicks = 40;
-    public int maceCooldownTicks = 40;
-    public double longJumpLeniencyMultiplier = 2.0;
-    public int longJumpCooldownTicks = 40;
-    public int maceCooldownTicks = 40;
     // Model flying ids.
     public static final String ID_JETPACK_ELYTRA = "jetpack.elytra";
     public static final String ID_POTION_LEVITATION = "potion.levitation";
@@ -149,7 +145,6 @@ public class MovingConfig extends ACheckConfig {
     // Leniency for Mace usage
     public final double     maceLeniency;
     public final int        maceLeniencyTicks;
-    public final int maceCooldownTicks;
 
     // Leniency for Wind Charge usage
     public final double     windChargeLeniency;
