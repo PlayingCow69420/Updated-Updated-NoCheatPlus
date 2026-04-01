@@ -311,6 +311,7 @@ public class MovingConfig extends ACheckConfig {
         // Load Reverse Step config (defaults to 1.0 blocks)
         sfReverseStep = config.getDouble("checks.moving.survivalfly.reversestep", 1.0);
 
+
         final double sfStepHeight = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_STEPHEIGHT, Double.MAX_VALUE);
         if (sfStepHeight == Double.MAX_VALUE) {
             final String ref;

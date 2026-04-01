@@ -166,7 +166,11 @@ public class SurvivalFly extends Check {
         if (data.maceLeniencyRemaining > 0) data.maceLeniencyRemaining--;
         if (data.windChargeLeniencyRemaining > 0) data.windChargeLeniencyRemaining--;
         if (data.longJumpLeniencyRemaining > 0) data.longJumpLeniencyRemaining--;
-
+// Trigger: Detect Step for LongJump Leniency
+// IMPROVEMENT: Added 'fromOnGround' to strictly ensure this was a valid ground-to-ground step
+        if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround) {
+            data.longJumpLeniencyRemaining = cc.longJumpLeniencyTicks;
+        }
 // Trigger: Detect Step for LongJump Leniency
         // IMPROVEMENT: Added 'fromOnGround' to strictly ensure this was a valid ground-to-ground step
         if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround) {
@@ -2097,6 +2101,16 @@ public class SurvivalFly extends Check {
             }
             if (!data.isUsingItem) {
                 hAllowedDistance = setAllowedhDist(player, sprinting, thisMove, data, cc, pData, from, to, true);
+
+// Apply LongJump leniency BEFORE the horizontal check
+                if (data.longJumpLeniencyRemaining > 0 && cc.longJumpLeniencyMultiplier > 1.0) {
+                    hAllowedDistance *= cc.longJumpLeniencyMultiplier;
+                    thisMove.hAllowedDistance *= cc.longJumpLeniencyMultiplier;
+                    thisMove.hAllowedDistanceBase *= cc.longJumpLeniencyMultiplier;
+                    tags.add("longjump_lenient(" + data.longJumpLeniencyRemaining + ")");
+                }
+
+// Use the correct horizontal distance value from thisMove
                 hDistanceAboveLimit = thisMove.hDistance - hAllowedDistance;
             }
         }
