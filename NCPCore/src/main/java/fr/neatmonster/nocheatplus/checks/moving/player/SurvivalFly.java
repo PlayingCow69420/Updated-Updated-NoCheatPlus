@@ -176,6 +176,9 @@ public class SurvivalFly extends Check {
             data.longJumpLeniencyRemaining = Math.max(16, cc.longJumpLeniencyTicks);
             data.longJumpCooldownRemaining = cc.longJumpCooldownTicks;
             tags.add("longjump_step_granted");
+
+            // DEBUG: Force a message in console
+            System.out.println("[LongJump] Step detected, leniency=" + data.longJumpLeniencyRemaining);
         }
 
 
@@ -189,10 +192,11 @@ public class SurvivalFly extends Check {
             }
         }
 
-        // Detect takeoff (jump off ground) after a step → start one full longjump
+// Detect takeoff (jump off ground) after a step → start one full longjump
         if (fromOnGround && !toOnGround && data.longJumpLeniencyRemaining > 0) {
-            data.longJumpLeniencyRemaining = 40;   // enough for any normal jump
+            data.longJumpLeniencyRemaining = 40;
             tags.add("longjump_takeoff");
+            System.out.println("[LongJump] Takeoff, leniency=" + data.longJumpLeniencyRemaining);
         }
 
         // Detect landing → consume leniency (one longjump completed)
@@ -325,6 +329,7 @@ public class SurvivalFly extends Check {
                 thisMove.hAllowedDistance *= cc.longJumpLeniencyMultiplier;
                 thisMove.hAllowedDistanceBase *= cc.longJumpLeniencyMultiplier;
                 tags.add("longjump_lenient(" + data.longJumpLeniencyRemaining + ")");
+                System.out.println("[LongJump] Multiplier applied, hAllowed=" + hAllowedDistance);
                 // Do NOT consume here — consumption happens automatically on landing
             }
 
