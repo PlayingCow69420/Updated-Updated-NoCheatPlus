@@ -593,11 +593,17 @@ public class SurvivalFly extends Check {
         //////////////////////////////////////
         final boolean inAir = Magic.inAir(thisMove);
 
-        // If long jump leniency is active and player is in the air, ignore ALL violations
+        // If long jump leniency is active and player is in the air
         if (data.longJumpLeniencyRemaining > 0 && !toOnGround) {
+            // Ignore horizontal violations always
             hDistanceAboveLimit = 0;
-            vDistanceAboveLimit = 0;
-            tags.add("leniency_ignore_all_violations");
+            // Ignore vertical violations only while ascending (yDistance > 0)
+            if (yDistance > 0) {
+                vDistanceAboveLimit = 0;
+                tags.add("leniency_ignore_ascending_violations");
+            } else {
+                tags.add("leniency_ignore_horizontal_only");
+            }
         }
 
         // Detect landing and consume leniency
