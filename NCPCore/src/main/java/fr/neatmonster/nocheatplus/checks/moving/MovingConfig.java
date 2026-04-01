@@ -65,6 +65,7 @@ public class MovingConfig extends ACheckConfig {
      * 1.0 = Normal strictness.
      */
     public double longJumpLeniencyMultiplier = 2.0;
+    public int longJumpCooldownTicks = 40;
     // Model flying ids.
     public static final String ID_JETPACK_ELYTRA = "jetpack.elytra";
     public static final String ID_POTION_LEVITATION = "potion.levitation";
@@ -304,6 +305,10 @@ public class MovingConfig extends ACheckConfig {
 
         windChargeLeniency = config.getDouble("checks.moving.survivalfly.windcharge.leniency", 0.6);
         windChargeLeniencyTicks = config.getInt("checks.moving.survivalfly.windcharge.ticks", 60);
+        // Load LongJump leniency configs
+        longJumpLeniencyMultiplier = config.getDouble("checks.moving.survivalfly.longjump.multiplier", 2.0);
+        longJumpLeniencyTicks = config.getInt("checks.moving.survivalfly.longjump.ticks", 10);
+        longJumpCooldownTicks = config.getInt("checks.moving.survivalfly.longjump.cooldown", 40);
 
         sfSetBackPolicyFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE);
         sfSetBackPolicyVoid = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID);

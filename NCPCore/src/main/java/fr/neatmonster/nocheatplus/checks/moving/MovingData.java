@@ -79,8 +79,8 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public double passableVL = 0.0;
     public int maceLeniencyRemaining = 0;
     public int windChargeLeniencyRemaining = 0;
-    /** Remaining ticks for LongJump leniency after a step. */
     public int longJumpLeniencyRemaining = 0;
+    public int longJumpCooldownRemaining;
 
 
 

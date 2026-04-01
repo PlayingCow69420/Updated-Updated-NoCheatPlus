@@ -165,21 +165,17 @@ public class SurvivalFly extends Check {
 // Tick leniency timers
         if (data.maceLeniencyRemaining > 0) data.maceLeniencyRemaining--;
         if (data.windChargeLeniencyRemaining > 0) data.windChargeLeniencyRemaining--;
-        if (data.longJumpLeniencyRemaining > 0) data.longJumpLeniencyRemaining--;
-// Trigger: Detect Step for LongJump Leniency
-// IMPROVEMENT: Added 'fromOnGround' to strictly ensure this was a valid ground-to-ground step
-        if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround) {
-            data.longJumpLeniencyRemaining = cc.longJumpLeniencyTicks;
-        }
-// Trigger: Detect Step for LongJump Leniency
-        // IMPROVEMENT: Added 'fromOnGround' to strictly ensure this was a valid ground-to-ground step
-        if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround) {
-            data.longJumpLeniencyRemaining = cc.longJumpLeniencyTicks;
-        }
+        if (data.longJumpCooldownRemaining > 0) data.longJumpCooldownRemaining--;
+
         // Trigger: Detect Step for LongJump Leniency
-        // Checks if the player moved upwards within the allowed step height and landed on the ground
-        if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && toOnGround) {
+        // Only apply leniency when a legitimate ground-to-ground step is detected.
+        // This prevents the multiplier from being active during normal long jumps / bunny hops.
+        // IMPROVEMENT: Added 'fromOnGround' to strictly ensure this was a valid ground-to-ground step
+        if (yDistance > 0.0 && yDistance <= cc.sfStepHeight && fromOnGround && toOnGround
+                && data.longJumpCooldownRemaining <= 0) {
+
             data.longJumpLeniencyRemaining = cc.longJumpLeniencyTicks;
+            data.longJumpCooldownRemaining = cc.longJumpCooldownTicks;
         }
         // Determine if the player is actually sprinting.
         final boolean sprinting;
