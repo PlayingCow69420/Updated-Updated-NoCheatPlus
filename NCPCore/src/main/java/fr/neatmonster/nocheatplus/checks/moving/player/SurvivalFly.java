@@ -189,7 +189,16 @@ public class SurvivalFly extends Check {
             System.out.println("[LongJump] Step detected, leniency=" + data.longJumpLeniencyRemaining);
         }
 
-
+// Detect takeoff (jump off ground) after a step → start one full longjump
+        if (fromOnGround && !toOnGround && data.longJumpLeniencyRemaining > 0) {
+            data.longJumpLeniencyRemaining = 40;   // enough for any normal jump
+            tags.add("longjump_takeoff");
+        }
+// Detect landing → consume leniency (one longjump completed)
+        if (!fromOnGround && toOnGround && data.longJumpLeniencyRemaining > 0) {
+            data.longJumpLeniencyRemaining = 0;
+            tags.add("longjump_landed_consumed");
+        }
         // Trigger: Grant Mace Leniency when holding a mace and cooldown is done
         if (data.maceCooldownRemaining <= 0) {
             ItemStack mainHand = Bridge1_9.getItemInMainHand(player);
@@ -571,10 +580,9 @@ public class SurvivalFly extends Check {
         //////////////////////////////////////
         final boolean inAir = Magic.inAir(thisMove);
         // If long jump leniency is active, ignore all violations
-        if (data.longJumpLeniencyRemaining > 0) {
-            hDistanceAboveLimit = 0;
-            vDistanceAboveLimit = 0;
-            tags.add("leniency_ignore_violations");
+        if (!fromOnGround && toOnGround && data.longJumpLeniencyRemaining > 0) {
+            data.longJumpLeniencyRemaining = 0;
+            tags.add("longjump_landed_consumed");
         }
 
         final double result = (Math.max(hDistanceAboveLimit, 0D) + Math.max(vDistanceAboveLimit, 0D)) * 100D;
